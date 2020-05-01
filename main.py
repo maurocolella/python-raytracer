@@ -1,3 +1,6 @@
+import pygame
+pygame.init()
+
 from PIL import Image
 import numpy as np
 import math
@@ -25,9 +28,15 @@ def ray_color(r: Ray):
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
 
 def main():
-    image_width = 400
-    image_height = 200
-    data = np.zeros((image_height, image_width, 3), dtype=np.uint8)
+    image_width = 800
+    image_height = 400
+    data = np.zeros((image_width, image_height, 3), dtype=np.uint8)
+
+    size = (image_width, image_height)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption("Raytracer")
+    surf = pygame.Surface((data.shape[0], data.shape[1]))
+    liveRender = True
 
     lower_left_corner = Vec3(-2.0, -1.0, -1.0)
     horizontal = Vec3(4.0, 0.0, 0.0)
@@ -35,15 +44,29 @@ def main():
     origin = Vec3(0.0, 0.0, 0.0)
 
     for x in range(0,image_width) :
+        if liveRender:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
         for y in range(0,image_height) :
             u = x / image_width
             v = y / image_height
             r = Ray(origin, lower_left_corner + u*horizontal + v*vertical)
             rgb = ray_color(r)
 
-            data[y,x] = rgb.asColor()
-    img = Image.fromarray(np.flipud(data), 'RGB')
+            data[x,y] = rgb.asColor()
+
+        if liveRender:
+            pygame.surfarray.blit_array(surf, np.fliplr(data))
+            # surf = pygame.transform.scale(surf, size)
+            screen.fill((0, 0, 0))
+            # blit the transformed surface onto the screen
+            screen.blit(surf, (0, 0))
+            pygame.display.update()
+    img = Image.fromarray(np.rot90(data), 'RGB')
     img.save('render.png')
     img.show()
+    pygame.quit()
 
 main()
