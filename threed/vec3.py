@@ -27,14 +27,11 @@ class Vec3(object):
     def asColor(self):
         return [int(255 * self.x), int(255 * self.y), int(255 * self.z)]
 
-    def __add__(self, v):
-        return Vec3(self.x + v.x, self.y + v.y, self.z + v.z)
-
-    def __neg__(self):
-        return Vec3(-self.x, -self.y, -self.z)
-
-    def __sub__(self, v):
-        return self + (-v)
+    def __truediv__(self, v):
+        if isinstance(v, Vec3):
+            return Vec3(self.x / v.x, self.y / v.y, self.z / v.z)
+        else:
+            return Vec3(self.x / v, self.y / v, self.z / v)
 
     def __mul__(self, v):
         if isinstance(v, Vec3):
@@ -45,11 +42,14 @@ class Vec3(object):
     def __rmul__(self, v):
         return self.__mul__(v)
 
-    def __truediv__(self, v):
-        if isinstance(v, Vec3):
-            return Vec3(self.x / v.x, self.y / v.y, self.z / v.z)
-        else:
-            return Vec3(self.x / v, self.y / v, self.z / v)
+    def __add__(self, v):
+        return Vec3(self.x + v.x, self.y + v.y, self.z + v.z)
+
+    def __neg__(self):
+        return Vec3(-self.x, -self.y, -self.z)
+
+    def __sub__(self, v):
+        return self + (-v)
 
     def __str__(self):
         return '[ %.4f, %.4f, %.4f ]' % (self.x, self.y, self.z)
