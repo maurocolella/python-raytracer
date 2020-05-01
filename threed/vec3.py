@@ -24,6 +24,9 @@ class Vec3(object):
     def norm(self):
         return math.sqrt(Vec3.dot(self, self))
 
+    def length_squared(self):
+        return self.x ** 2 + self.y ** 2 + self.z ** 2
+
     def asColor(self):
         return [int(255 * self.x), int(255 * self.y), int(255 * self.z)]
 
