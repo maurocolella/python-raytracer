@@ -53,11 +53,11 @@ def ray_color(r: Ray, world: Hittable, depth: int):
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
 
 def main():
-    window_width = 2400
-    window_height = 1200
+    window_width = 800
+    window_height = 400
 
-    image_width = 1000
-    image_height = 500
+    image_width = 800
+    image_height = 400
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -75,7 +75,7 @@ def main():
     world = HittableList()
     world.add(Sphere(Vec3(-0.5, 0, -1.5), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
     world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
-    world.add(Sphere(Vec3(0.5, 0, -1.5), 0.5, Metal(Vec3(0.8, 0.8, 0.8))))
+    world.add(Sphere(Vec3(0.5, 0, -1.5), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.2)))
 
     cam = Camera()
 
