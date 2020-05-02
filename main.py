@@ -32,8 +32,8 @@ def main():
     window_width = 2000
     window_height = 1000
 
-    image_width = 400
-    image_height = 200
+    image_width = 200
+    image_height = 100
 
     window_size = (window_width, window_height)
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
@@ -52,6 +52,13 @@ def main():
     # pool = mp.Pool(mp.cpu_count())
 
     for x in range(0, image_width):
+        for y in range(0, image_height):
+            u = x / image_width
+            v = y / image_height
+            r = Ray(origin, lower_left_corner + u*horizontal + v*vertical)
+            rgb = ray_color(r)
+
+            data[x, y] = rgb.asColor()
         if live_render:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -63,13 +70,6 @@ def main():
             render_buffer = pygame.transform.scale(surf, window_size)
             screen.blit(render_buffer, (0, 0))
             pygame.display.update()
-        for y in range(0, image_height):
-            u = x / image_width
-            v = y / image_height
-            r = Ray(origin, lower_left_corner + u*horizontal + v*vertical)
-            rgb = ray_color(r)
-
-            data[x, y] = rgb.asColor()
 
     img = Image.fromarray(np.rot90(data), 'RGB')
     img.save('render.png')
