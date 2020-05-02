@@ -1,4 +1,3 @@
-import math
 from .vec3 import Vec3
 
 class Ray(object):
@@ -6,5 +5,5 @@ class Ray(object):
         self.orig = origin
         self.dir = direction
 
-    def at(self, t):
+    def at(self, t: float):
         return self.orig + t*self.dir

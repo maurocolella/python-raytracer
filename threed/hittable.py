@@ -9,5 +9,5 @@ class HitRecord(NamedTuple):
 
 class Hittable(ABC):
     @abstractmethod
-    def hit(self, r: Ray, t_min, t_max, rec: HitRecord):
+    def hit(self, r: Ray, t_min: float, t_max: float, rec: HitRecord):
         pass
