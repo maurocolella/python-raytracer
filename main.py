@@ -1,8 +1,8 @@
 import math
 import random
+import pygame
 import numpy as np
 # import multiprocessing as mp
-import pygame
 from PIL import Image
 from threed.vec3 import Vec3
 from threed.ray import Ray
@@ -10,6 +10,9 @@ from threed.sphere import Sphere
 from threed.hittable import Hittable, HitRecord
 from threed.hittable_list import HittableList
 from threed.camera import Camera
+
+from threed.lambert_material import Lambertian
+from threed.metal_material import Metal
 
 pygame.init()
 
@@ -38,9 +41,13 @@ def ray_color(r: Ray, world: Hittable, depth: int):
 
     did_hit, rec = world.hit(r, 0.001, float("inf"), rec)
     if did_hit:
-        target = rec.p + rec.normal + random_unit_vector()
-        return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth-1)
-        # return 0.5 * (rec.normal + Vec3(1, 1, 1))
+        scattered = Ray(Vec3(0, 0, 0), Vec3(1, 1, 1))
+        attenuation = Vec3(0, 0, 0)
+        scatter, scattered, attenuation = rec.material.scatter(r, rec, attenuation, scattered)
+
+        if scatter:
+            return attenuation * ray_color(scattered, world, depth-1)
+        return Vec3(0, 0, 0)
     unit_direction = Vec3.normalize(r.dir)
     t = 0.5*(unit_direction.y + 1.0)
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
@@ -66,8 +73,9 @@ def main():
     samples_per_pixel = 100
 
     world = HittableList()
-    world.add(Sphere(Vec3(0, 0, -1), 0.5))
-    world.add(Sphere(Vec3(0, -100.5, -1), 100))
+    world.add(Sphere(Vec3(-0.5, 0, -1.5), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
+    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
+    world.add(Sphere(Vec3(0.5, 0, -1.5), 0.5, Metal(Vec3(0.8, 0.8, 0.8))))
 
     cam = Camera()
 
@@ -76,7 +84,7 @@ def main():
     for x in range(0, image_width):
         for y in range(0, image_height):
             pixel = Vec3(0, 0, 0)
-            for s in range(0,samples_per_pixel):
+            for s in range(0, samples_per_pixel):
                 u = (x + random.uniform(0, 0.999)) / image_width
                 v = (y + random.uniform(0, 0.999)) / image_height
                 r = cam.get_ray(u, v)

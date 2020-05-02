@@ -2,11 +2,13 @@ import math
 from .vec3 import Vec3
 from .ray import Ray
 from .hittable import Hittable, HitRecord
+from .material import Material
 
 class Sphere(Hittable):
-    def __init__(self, center: Vec3, radius):
+    def __init__(self, center: Vec3, radius: float, material: Material):
         self.center = center
         self.radius = radius
+        self.material = material
 
     def hit(self, r: Ray, t_min: float, t_max: float, rec: HitRecord):
         oc = r.orig - self.center
@@ -23,6 +25,7 @@ class Sphere(Hittable):
                 rec.p = r.at(rec.t)
                 outward_normal = (rec.p - self.center) / self.radius
                 rec.set_face_normal(r, outward_normal)
+                rec.material = self.material
                 return (True, rec)
             temp = (-half_b + root) / a
             if t_min < temp < t_max:
@@ -30,5 +33,6 @@ class Sphere(Hittable):
                 rec.p = r.at(rec.t)
                 outward_normal = (rec.p - self.center) / self.radius
                 rec.set_face_normal(r, outward_normal)
+                rec.material = self.material
                 return (True, rec)
         return (False, rec)
