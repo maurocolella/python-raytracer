@@ -1,3 +1,4 @@
+import math
 import random
 import numpy as np
 # import multiprocessing as mp
@@ -12,11 +13,34 @@ from threed.camera import Camera
 
 pygame.init()
 
-def ray_color(r: Ray, world: Hittable):
+def random_in_hemisphere(normal: Vec3):
+    in_unit_sphere = random_in_unit_sphere()
+    if Vec3.dot(in_unit_sphere, normal) > 0.0: # In the same hemisphere as the normal
+        return in_unit_sphere
+    return -in_unit_sphere
+
+def random_unit_vector():
+    a = random.uniform(0, 2*math.pi)
+    z = random.uniform(-1, 1)
+    r = math.sqrt(1 - z ** 2)
+    return Vec3(r*math.cos(a), r*math.sin(a), z)
+
+def random_in_unit_sphere():
+    while True:
+        p = Vec3.random(-1, 1)
+        if p.length_squared() < 1:
+            return p
+
+def ray_color(r: Ray, world: Hittable, depth: int):
     rec = HitRecord()
-    did_hit, rec = world.hit(r, 0, float("inf"), rec)
+    if depth <= 0:
+        return Vec3(0, 0, 0)
+
+    did_hit, rec = world.hit(r, 0.001, float("inf"), rec)
     if did_hit:
-        return 0.5 * (rec.normal + Vec3(1, 1, 1))
+        target = rec.p + rec.normal + random_unit_vector()
+        return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth-1)
+        # return 0.5 * (rec.normal + Vec3(1, 1, 1))
     unit_direction = Vec3.normalize(r.dir)
     t = 0.5*(unit_direction.y + 1.0)
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
@@ -25,8 +49,8 @@ def main():
     window_width = 2400
     window_height = 1200
 
-    image_width = 800
-    image_height = 400
+    image_width = 1000
+    image_height = 500
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -47,7 +71,7 @@ def main():
 
     cam = Camera()
 
-    # pool = mp.Pool(mp.cpu_count())
+    max_depth = 10
 
     for x in range(0, image_width):
         for y in range(0, image_height):
@@ -56,7 +80,7 @@ def main():
                 u = (x + random.uniform(0, 0.999)) / image_width
                 v = (y + random.uniform(0, 0.999)) / image_height
                 r = cam.get_ray(u, v)
-                sample = ray_color(r, world)
+                sample = ray_color(r, world, max_depth)
                 pixel += sample
 
             data[x, y] = pixel.asColor(samples_per_pixel)

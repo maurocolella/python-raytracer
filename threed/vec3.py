@@ -1,4 +1,5 @@
 import math
+import random
 
 class Vec3(object):
     def __init__(self, x: float, y: float, z: float):
@@ -21,6 +22,13 @@ class Vec3(object):
     def normalize(v):
         return v / v.norm()
 
+    @staticmethod
+    def random(min_val: float = 0, max_val: float = 0.999):
+        return Vec3(random.uniform(min_val, max_val),
+                    random.uniform(min_val, max_val),
+                    random.uniform(min_val, max_val))
+
+
     def norm(self):
         return math.sqrt(Vec3.dot(self, self))
 
@@ -32,9 +40,9 @@ class Vec3(object):
 
     def asColor(self, samples_per_pixel: int):
         scale = 1 / samples_per_pixel
-        r = scale * self.x
-        g = scale * self.y
-        b = scale * self.z
+        r = math.sqrt(scale * self.x)
+        g = math.sqrt(scale * self.y)
+        b = math.sqrt(scale * self.z)
         return [int(256 * self.clamp(r, 0.0, 0.999)), int(256 * self.clamp(g, 0.0, 0.999)), int(256 * self.clamp(b, 0.0, 0.999))]
 
     def __truediv__(self, v):
