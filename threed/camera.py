@@ -1,16 +1,25 @@
+import math
 from .vec3 import Vec3
 from .ray import Ray
 
 class Camera(object):
     def __init__(self,
-                 lower_left_corner=Vec3(-2, -1, -1),
-                 horizontal=Vec3(4, 0, 0),
-                 vertical=Vec3(0, 2, 0),
-                 origin=Vec3(0, 0, 0)):
-        self.lower_left_corner = lower_left_corner
-        self.horizontal = horizontal
-        self.vertical = vertical
-        self.origin = origin
+                 look_from: Vec3,
+                 look_at: Vec3,
+                 vup: Vec3,
+                 vfov: float,
+                 aspect: float):
+        theta = math.radians(vfov)
+        half_height = math.tan(theta/2)
+        half_width = aspect * half_height
+        w = Vec3.normalize(look_from - look_at)
+        u = Vec3.normalize(Vec3.cross(vup, w))
+        v = Vec3.cross(w, u)
+
+        self.origin = look_from
+        self.lower_left_corner = self.origin - half_width*u - half_height*v - w
+        self.horizontal = 2*half_width*u
+        self.vertical = 2*half_height*v
 
     def get_ray(self, u: float, v: float):
         return Ray(self.origin,

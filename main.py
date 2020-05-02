@@ -4,9 +4,7 @@ import numpy as np
 # import multiprocessing as mp
 from PIL import Image
 from threed.vec3 import Vec3
-from threed.ray import Ray
 from threed.sphere import Sphere
-from threed.hittable import Hittable, HitRecord
 from threed.hittable_list import HittableList
 from threed.camera import Camera
 from threed.renderer import Renderer
@@ -37,15 +35,18 @@ def main():
     samples_per_pixel = 100
 
     world = HittableList()
-    world.add(Sphere(Vec3(-0.5, 0, -1.5), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
-    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
-    world.add(Sphere(Vec3(0.5, 0, -1.5), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.2)))
+    world.add(Sphere(Vec3(-0.5, 0, -1), 0.5, Lambertian(Vec3(0.3, 0.3, 0.5))))
+    world.add(Sphere(Vec3(0, -100.5, -1), 100, Metal(Vec3(0.8, 0.7, 0.0), 0.0)))
+    world.add(Sphere(Vec3(0.5, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
 
-    cam = Camera()
+    aspect_ratio = image_width / image_height
+    cam = Camera(Vec3(3, 3, 2), Vec3(0, 0, -1), Vec3(0, 1, 0), 20, aspect_ratio)
 
     renderer = Renderer()
 
     max_depth = 10
+
+    # clock = pygame.time.Clock()
 
     for x in range(0, image_width):
         for y in range(0, image_height):
@@ -57,13 +58,13 @@ def main():
                 pixel += renderer.ray_color(r, world, max_depth)
 
             data[x, y] = pixel.asColor(samples_per_pixel)
+            if live_render:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
         if live_render:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
             pygame.surfarray.blit_array(render_buffer, np.fliplr(data))
-
             # transform the surface (scale)
             screen.fill((0, 0, 0))
             screen_buffer = pygame.transform.scale(render_buffer, window_size)
