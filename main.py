@@ -29,14 +29,20 @@ def ray_color(r: Ray):
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
 
 def main():
-    image_width = 800
-    image_height = 400
-    data = np.empty((image_width, image_height, 3), dtype=np.uint8)
+    window_width = 2000
+    window_height = 1000
 
+    image_width = 400
+    image_height = 200
+
+    window_size = (window_width, window_height)
+    data = np.empty((image_width, image_height, 3), dtype=np.uint8)
     size = (image_width, image_height)
-    screen = pygame.display.set_mode(size)
+
+    screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
     surf = pygame.Surface((data.shape[0], data.shape[1]))
+    render_buffer = pygame.Surface(window_size)
     live_render = True
 
     lower_left_corner = Vec3(-2.0, -1.0, -1.0)
@@ -52,10 +58,10 @@ def main():
                     pygame.quit()
                     return
             pygame.surfarray.blit_array(surf, np.fliplr(data))
-            # surf = pygame.transform.scale(surf, size)
             screen.fill((0, 0, 0))
             # blit the transformed surface onto the screen
-            screen.blit(surf, (0, 0))
+            render_buffer = pygame.transform.scale(surf, window_size)
+            screen.blit(render_buffer, (0, 0))
             pygame.display.update()
         for y in range(0, image_height):
             u = x / image_width
@@ -67,7 +73,11 @@ def main():
 
     img = Image.fromarray(np.rot90(data), 'RGB')
     img.save('render.png')
-    img.show()
-    pygame.quit()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
 
 main()
