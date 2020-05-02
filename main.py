@@ -1,4 +1,4 @@
-import math
+import random
 import numpy as np
 # import multiprocessing as mp
 import pygame
@@ -8,6 +8,7 @@ from threed.ray import Ray
 from threed.sphere import Sphere
 from threed.hittable import Hittable, HitRecord
 from threed.hittable_list import HittableList
+from threed.camera import Camera
 
 pygame.init()
 
@@ -21,8 +22,8 @@ def ray_color(r: Ray, world: Hittable):
     return (1.0-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
 
 def main():
-    window_width = 1600
-    window_height = 800
+    window_width = 2400
+    window_height = 1200
 
     image_width = 800
     image_height = 400
@@ -38,24 +39,27 @@ def main():
 
     live_render = True
 
-    lower_left_corner = Vec3(-2.0, -1.0, -1.0)
-    horizontal = Vec3(4.0, 0.0, 0.0)
-    vertical = Vec3(0.0, 2.0, 0.0)
-    origin = Vec3(0.0, 0.0, 0.0)
+    samples_per_pixel = 100
+
     world = HittableList()
     world.add(Sphere(Vec3(0, 0, -1), 0.5))
     world.add(Sphere(Vec3(0, -100.5, -1), 100))
+
+    cam = Camera()
 
     # pool = mp.Pool(mp.cpu_count())
 
     for x in range(0, image_width):
         for y in range(0, image_height):
-            u = x / image_width
-            v = y / image_height
-            r = Ray(origin, lower_left_corner + u*horizontal + v*vertical)
-            rgb = ray_color(r, world)
+            pixel = Vec3(0, 0, 0)
+            for s in range(0,samples_per_pixel):
+                u = (x + random.uniform(0, 0.999)) / image_width
+                v = (y + random.uniform(0, 0.999)) / image_height
+                r = cam.get_ray(u, v)
+                sample = ray_color(r, world)
+                pixel += sample
 
-            data[x, y] = rgb.asColor()
+            data[x, y] = pixel.asColor(samples_per_pixel)
         if live_render:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

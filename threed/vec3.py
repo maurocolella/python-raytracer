@@ -27,8 +27,15 @@ class Vec3(object):
     def length_squared(self):
         return self.x ** 2 + self.y ** 2 + self.z ** 2
 
-    def asColor(self):
-        return [int(255 * self.x), int(255 * self.y), int(255 * self.z)]
+    def clamp(self, x: float, min_value: float, max_value: float):
+        return max(min(x, max_value), min_value)
+
+    def asColor(self, samples_per_pixel: int):
+        scale = 1 / samples_per_pixel
+        r = scale * self.x
+        g = scale * self.y
+        b = scale * self.z
+        return [int(256 * self.clamp(r, 0.0, 0.999)), int(256 * self.clamp(g, 0.0, 0.999)), int(256 * self.clamp(b, 0.0, 0.999))]
 
     def __truediv__(self, v):
         if isinstance(v, Vec3):
