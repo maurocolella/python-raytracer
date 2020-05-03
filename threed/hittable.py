@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from .vec3 import Vec3
 from .ray import Ray
-from .material import Material
 from .lambert_material import Lambertian
 
 class HitRecord(object):
