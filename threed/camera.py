@@ -1,6 +1,7 @@
 import math
 from .vec3 import Vec3
 from .ray import Ray
+from .utils import Utils
 
 class Camera(object):
     def __init__(self,
@@ -8,19 +9,29 @@ class Camera(object):
                  look_at: Vec3,
                  vup: Vec3,
                  vfov: float,
-                 aspect: float):
+                 aspect: float,
+                 aperture: float,
+                 focus_dist: float):
+        self.origin = look_from
+        self.lens_radius = aperture / 2
+
         theta = math.radians(vfov)
         half_height = math.tan(theta/2)
         half_width = aspect * half_height
-        w = Vec3.normalize(look_from - look_at)
-        u = Vec3.normalize(Vec3.cross(vup, w))
-        v = Vec3.cross(w, u)
+        self.w = Vec3.normalize(look_from - look_at)
+        self.u = Vec3.normalize(Vec3.cross(vup, self.w))
+        self.v = Vec3.cross(self.w, self.u)
 
-        self.origin = look_from
-        self.lower_left_corner = self.origin - half_width*u - half_height*v - w
-        self.horizontal = 2*half_width*u
-        self.vertical = 2*half_height*v
+        self.lower_left_corner = self.origin \
+                                 - half_width * focus_dist * self.u \
+                                 - half_height * focus_dist * self.v \
+                                 - focus_dist * self.w
+        self.horizontal = 2 * half_width * focus_dist * self.u
+        self.vertical = 2 * half_height * focus_dist * self.v
 
-    def get_ray(self, u: float, v: float):
-        return Ray(self.origin,
-                   self.lower_left_corner + u*self.horizontal + v*self.vertical - self.origin)
+    def get_ray(self, s: float, t: float):
+        rd = self.lens_radius * Utils.random_in_unit_disk()
+        offset = self.u * rd.x + self.v * rd.y
+
+        return Ray(self.origin + offset,
+                   self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset)

@@ -14,15 +14,15 @@ from threed.metal_material import Metal
 def main():
     timer = Timer()
     pygame.init()
-    window_width = 960
-    window_height = 540
+    window_width = 640
+    window_height = 360
 
     window_size = (window_width, window_height)
     screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
 
-    image_width = 320 # 7680
-    image_height = 180 # 4320
+    image_width = 640 # 7680
+    image_height = 360 # 4320
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -31,7 +31,7 @@ def main():
 
     live_render = True
 
-    aa_samples_per_pixel = 40
+    aa_samples_per_pixel = 100
 
     world = HittableList()
     world.add(Sphere(Vec3(0, -100.5, -1), 100, Metal(Vec3(0.8, 0.7, 0.0), 0.0)))
@@ -40,7 +40,11 @@ def main():
     world.add(Sphere(Vec3(1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
 
     aspect_ratio = image_width / image_height
-    cam = Camera(Vec3(3, 3, 2), Vec3(0, 0, -1), Vec3(0, 1, 0), 20, aspect_ratio)
+    look_from = Vec3(3, 3, 2)
+    look_at = Vec3(0, 0, -1)
+    dist_to_focus = (look_from - look_at).norm()
+    aperture = 1.0
+    cam = Camera(look_from, look_at, Vec3(0, 1, 0), 20, aspect_ratio, aperture, dist_to_focus)
 
     max_depth = 10
 

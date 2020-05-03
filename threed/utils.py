@@ -23,3 +23,10 @@ class Utils(object):
             p = Vec3.random(-1, 1)
             if p.length_squared() < 1:
                 return p
+
+    @staticmethod
+    def random_in_unit_disk():
+        while True:
+            p = Vec3(random.uniform(-1, 1), random.uniform(-1, 1), 0)
+            if p.length_squared() < 1:
+                return p
