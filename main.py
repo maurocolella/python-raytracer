@@ -1,27 +1,29 @@
 import random
-import pygame
 import numpy as np
+import pygame
 from PIL import Image
 from threed.vec3 import Vec3
 from threed.sphere import Sphere
 from threed.hittable_list import HittableList
 from threed.camera import Camera
 from threed.renderer import Renderer
+from threed.timing import Timer
 
 from threed.lambert_material import Lambertian
 from threed.metal_material import Metal
 
 def main():
+    timer = Timer()
     pygame.init()
-    window_width = 800
-    window_height = 400
+    window_width = 960
+    window_height = 540
 
     window_size = (window_width, window_height)
     screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
 
-    image_width = 800
-    image_height = 400
+    image_width = 320 # 7680
+    image_height = 180 # 4320
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -30,7 +32,7 @@ def main():
 
     live_render = True
 
-    aa_samples_per_pixel = 100
+    aa_samples_per_pixel = 40
 
     world = HittableList()
     world.add(Sphere(Vec3(0, -100.5, -1), 100, Metal(Vec3(0.8, 0.7, 0.0), 0.0)))
@@ -65,6 +67,7 @@ def main():
 
     img = Image.fromarray(np.rot90(data), 'RGB')
     img.save('render.png')
+    timer.log("Render Complete", True)
 
     while True:
         for event in pygame.event.get():
