@@ -1,5 +1,5 @@
-import random
 import math
+import random
 from .vec3 import Vec3
 
 class Utils(object):

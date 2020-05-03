@@ -10,6 +10,7 @@ from threed.timing import Timer
 
 from threed.lambert_material import Lambertian
 from threed.metal_material import Metal
+from threed.dielectric_material import Glass
 
 def main():
     timer = Timer()
@@ -21,8 +22,8 @@ def main():
     screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
 
-    image_width = 640 # 7680
-    image_height = 360 # 4320
+    image_width = 320 # 7680
+    image_height = 180 # 4320
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -31,11 +32,11 @@ def main():
 
     live_render = True
 
-    aa_samples_per_pixel = 100
+    aa_samples_per_pixel = 10
 
     world = HittableList()
-    world.add(Sphere(Vec3(0, -100.5, -1), 100, Metal(Vec3(0.8, 0.7, 0.0), 0.0)))
-    world.add(Sphere(Vec3(-1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
+    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.7, 0.0))))
+    world.add(Sphere(Vec3(-1.0, 0, -1), -0.5, Glass(1.5)))
     world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.3, 0.3, 0.5))))
     world.add(Sphere(Vec3(1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
 

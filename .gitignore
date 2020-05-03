@@ -113,6 +113,7 @@ ENV/
 env.bak/
 venv.bak/
 linux_env/
+pypy_env/
 
 # Spyder project settings
 .spyderproject
