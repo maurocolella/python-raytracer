@@ -1,6 +1,4 @@
-import math
 import random
-# import multiprocessing as mp
 from .vec3 import Vec3
 from .ray import Ray
 from .hittable import Hittable, HitRecord
@@ -23,13 +21,10 @@ class Renderer(object):
         self.aa_samples_per_pixel = aa_samples_per_pixel
 
     def render(self, x: int, y: int):
-        samples = []
-        for s in range(0, self.aa_samples_per_pixel):
-            u = (x + random.uniform(0, 0.999)) / self.image_width
-            v = (y + random.uniform(0, 0.999)) / self.image_height
-            r = self.cam.get_ray(u, v)
-            samples.append(self.ray_color(r, self.world, self.max_depth))
-        return samples
+        u = (x + random.uniform(0, 0.999)) / self.image_width
+        v = (y + random.uniform(0, 0.999)) / self.image_height
+        r = self.cam.get_ray(u, v)
+        return self.ray_color(r, self.world, self.max_depth)
 
     def ray_color(self, r: Ray, world: Hittable, depth: int):
         rec = HitRecord()

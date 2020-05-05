@@ -1,7 +1,8 @@
 import random
 import numpy as np
-import pygame
 from PIL import Image
+import multiprocessing as mp
+
 from threed.vec3 import Vec3
 from threed.sphere import Sphere
 from threed.hittable_list import HittableList
@@ -53,48 +54,52 @@ def random_scene():
 
 def main():
     timer = Timer()
-    pygame.init()
-    window_width = 640
-    window_height = 360
+    window_width = 900
+    window_height = 600
+    num_cpus = max(1, int(mp.cpu_count() - 2))
 
     window_size = (window_width, window_height)
     screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
 
-    image_width = 640 # 7680
-    image_height = 360 # 4320
+    image_width = 1200 # 7680
+    image_height = 800 # 4320
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
     render_buffer = pygame.Surface((data.shape[0], data.shape[1]))
     screen_buffer = pygame.Surface(window_size)
 
-    aa_samples_per_pixel = 10
+    aa_samples_per_pixel = 100
 
-    world = HittableList()
-    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.7, 0.0))))
-    world.add(Sphere(Vec3(-1.0, 0, -1), 0.45, Glass(1.5)))
-    world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.3, 0.3, 0.5))))
-    world.add(Sphere(Vec3(1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
+    world = random_scene()
+    # world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.7, 0.0))))
+    # world.add(Sphere(Vec3(-1.0, 0, -1), 0.45, Glass(1.5)))
+    # world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.3, 0.3, 0.5))))
+    # world.add(Sphere(Vec3(1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
 
     aspect_ratio = image_width / image_height
-    look_from = Vec3(3, 3, 2) # Vec3(13, 2, 3)
-    look_at = Vec3(0, 0, -1) # Vec3(0, 0, 0)
+    look_from = Vec3(13, 2, 3)
+    look_at = Vec3(0, 0, 0)
     vup = Vec3(0, 1, 0)
     dist_to_focus = 10 # (look_from - look_at).norm()
     aperture = 0.1
     cam = Camera(look_from, look_at, vup, 20, aspect_ratio, aperture, dist_to_focus)
 
     max_depth = 10
-
+    live_render = True
     renderer = Renderer(cam, world, image_width, image_height, max_depth, aa_samples_per_pixel)
 
-    live_render = True
+    pool = mp.Pool(num_cpus)
 
     for x in range(0, image_width):
         for y in range(0, image_height):
-            pixel = sum(renderer.render(x, y), Vec3(0, 0, 0))
+            # TODO: spawn sub-processes as a function of and y
+            samples = pool.starmap_async(renderer.render,
+                                         [(x, y) for s in range(0, aa_samples_per_pixel)])
+            pixel = sum(samples.get(), Vec3(0, 0, 0))
             data[x, y] = pixel.asColor(aa_samples_per_pixel)
+            # TODO: decouple render/display
             if live_render:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -112,6 +117,7 @@ def main():
     img = Image.fromarray(np.rot90(data), 'RGB')
     img.save('render.png')
     timer.log("Render Complete", True)
+    pool.close()
 
     while True:
         for event in pygame.event.get():
@@ -119,4 +125,7 @@ def main():
                 pygame.quit()
                 return
 
-main()
+if __name__ == '__main__':
+    import pygame
+    pygame.init()
+    main()
