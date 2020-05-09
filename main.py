@@ -45,25 +45,25 @@ def random_scene():
                     world.add(Sphere(center, 0.2, Glass(1.5)))
 
     world.add(Sphere(Vec3(0, 1, 0), 1.0, Glass(1.5)))
-
     world.add(Sphere(Vec3(-4, 1, 0), 1.0, Lambertian(Vec3(0.4, 0.2, 0.1))))
-
     world.add(Sphere(Vec3(4, 1, 0), 1.0, Metal(Vec3(0.7, 0.6, 0.5), 0.0)))
 
     return world
 
 def main():
     timer = Timer()
+    aspect_ratio = 16.0 / 9.0
+    aspect_bias = 1.2 # workaround for subtle discrepancies between numeric operations in C++ vs Python3+
     window_width = 900
-    window_height = 600
+    window_height = (int) (window_width / aspect_ratio)
     num_cpus = max(1, int(mp.cpu_count() - 2))
 
     window_size = (window_width, window_height)
     screen = pygame.display.set_mode(window_size)
     pygame.display.set_caption("Raytracer")
 
-    image_width = 1200 # 7680
-    image_height = 800 # 4320
+    image_width = 120 # 7680
+    image_height = (int) (image_width / aspect_ratio) # 4320
 
     data = np.empty((image_width, image_height, 3), dtype=np.uint8)
 
@@ -78,13 +78,12 @@ def main():
     # world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.3, 0.3, 0.5))))
     # world.add(Sphere(Vec3(1.0, 0, -1), 0.5, Metal(Vec3(0.8, 0.8, 0.8), 0.1)))
 
-    aspect_ratio = image_width / image_height
     look_from = Vec3(13, 2, 3)
     look_at = Vec3(0, 0, 0)
     vup = Vec3(0, 1, 0)
     dist_to_focus = 10 # (look_from - look_at).norm()
     aperture = 0.1
-    cam = Camera(look_from, look_at, vup, 20, aspect_ratio, aperture, dist_to_focus)
+    cam = Camera(look_from, look_at, vup, 20, aspect_ratio * aspect_bias, aperture, dist_to_focus)
 
     max_depth = 10
     live_render = True

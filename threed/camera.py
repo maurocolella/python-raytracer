@@ -16,7 +16,7 @@ class Camera(object):
         self.lens_radius = aperture / 2
 
         theta = math.radians(vfov)
-        half_height = math.tan(theta/2)
+        half_height = math.tan(theta / 2)
         half_width = aspect * half_height
         self.w = Vec3.normalize(look_from - look_at)
         self.u = Vec3.normalize(Vec3.cross(vup, self.w))
